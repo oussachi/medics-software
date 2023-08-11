@@ -10,7 +10,8 @@ DATABASE_NAME = 'medics'
 CONNECTION_STRING = 'mongodb+srv://medicssoftware:sFuj1OxAiWxQt3vu@cluster0.yjfetxk.mongodb.net/?retryWrites=true&w=majority'
 USER_COLLECTION = 'users'
 HOST_EMAIL = 'medicssoftware@gmail.com'
-HOST_EMAILPASSWORD = ''
+HOST_EMAILPASSWORD = 'flasktaskupwork'
+UPLOAD_FOLDER = './static'
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -21,30 +22,47 @@ Session(app)
 def home():
     return render_template('user/profile.html')
 
+
+
+# DONE
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
-    if request.method == "POST":
-        userName = request.form["username"]
-        password = request.form["password"]
-        email = request.form["email"]
-        fullName = request.form["fullname"]
-        bio = request.form["bio"]
-        if request.files['file'].filename != '':
-            filePath = request.files['file'].filename
-            fileId = uploadFile(CONNECTION_STRING, DATABASE_NAME, filePath)
-        else:
-            fileId = None
+    try:
+        if request.method == "POST":
 
-        query = { "UserName": userName }
-        user = { "UserName": userName, "Password": password, "Email": email, "FullName": fullName, "Bio": bio, "file": fileId }
-        insertedId = insertDocument(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, user)
-        if (insertedId != None):
-            message = 'User created successfully!!'
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            
+            userName = request.form["username"]
+            password = request.form["password"]
+            email = request.form["email"]
+            fullName = request.form["fullname"]
+            bio = request.form["bio"]
+            file = request.files['file']
+            filePath = os.path.join(basedir, UPLOAD_FOLDER, file.filename)
+            if file.filename != '':
+                #filePath = request.files['file'].filename
+                file.save(filePath)
+                fileId = uploadFile(CONNECTION_STRING, DATABASE_NAME, filePath)
+            else:
+                fileId = None
+            query = { "UserName": userName }
+            user = { "UserName": userName, "Password": password, "Email": email, "FullName": fullName, "Bio": bio, "file": fileId }
+            insertedId = insertDocument(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, user)
+            if (insertedId != None):
+                message = 'User created successfully!!'
+            else:
+                message = 'Error has been occurred, Please try again!!'
         else:
-            message = 'Error has been occurred, Please try again!!'
-    else:
-        return render_template('login.html')
+            return render_template('login.html')
+    except Exception as e:
+        return f"error : {e}"
 
+
+
+
+
+
+# DONE
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
     if request.method == "POST":
@@ -53,13 +71,17 @@ def signin():
 
         user = { "UserName": userName, "Password": password }
         insertedId = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, user)
-        if (insertedId != None):
-            render_template('profile.html')
+        insertedIdList = list(insertedId)
+        if (len(insertedIdList) != 0):
+            return render_template('profile.html')
         else:
             message = 'Wrong Credentials!!'
     else:
         return render_template('login.html')
 
+
+
+# TO DO
 @app.route('/forgotpassword', methods=["GET", "POST"])
 def forgotpassword():
     if request.method == "GET":
@@ -85,15 +107,20 @@ def forgotpassword():
             else:
                 message = 'Error has been occurred, Please try again!!'
     
+
+
+
+
+# DOING
 @app.route('/profile', methods=["GET", "POST"])
 def profile():
+    userName = session.get("name")
     if request.method == "GET":
         query = { "UserName": userName }
         user = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, query)
     elif request.method == "POST":
-        userName = session.get("name")
         password = request.form["password"]
-        email = request.form["email"]
+        email = request.DOINGform["email"]
         fullName = request.form["fullname"]
         bio = request.form["bio"]
         if request.files['file'].filename != '':
@@ -109,7 +136,12 @@ def profile():
             message = 'User updated successfully!!'
         else:
             message = 'Error has been occurred, Please try again!!'
-    
+
+
+
+
+
+  
 @app.route('/consult', methods=["GET", "POST"])
 def consult():
     if request.method == "POST":
@@ -130,6 +162,11 @@ def consult():
         else:
             message = 'Error has been occurred, Please try again!!'
 
+
+
+
+
+
 @app.route('/consultation', methods=["GET", "POST"])
 def consultation():
     if request.method == "GET":
@@ -138,6 +175,13 @@ def consultation():
         if (consultationId != None or consultationId != ''):
             query = { "Id": consultationId }
             consultation = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, query)
+
+
+
+
+
+
+
 
 @app.route('/consultations', methods=["GET", "POST"])
 def consultations():
