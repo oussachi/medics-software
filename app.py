@@ -43,6 +43,7 @@ def signup():
                 #filePath = request.files['file'].filename
                 file.save(filePath)
                 fileId = uploadFile(CONNECTION_STRING, DATABASE_NAME, filePath)
+                os.remove(filePath)
             else:
                 fileId = None
             query = { "UserName": userName }
@@ -52,14 +53,11 @@ def signup():
                 message = 'User created successfully!!'
             else:
                 message = 'Error has been occurred, Please try again!!'
+            return message
         else:
             return render_template('login.html')
     except Exception as e:
         return f"error : {e}"
-
-
-
-
 
 
 # DONE
@@ -76,23 +74,27 @@ def signin():
             return render_template('profile.html')
         else:
             message = 'Wrong Credentials!!'
+            return message
     else:
         return render_template('login.html')
 
 
 
-# TO DO
+# DONE
 @app.route('/forgotpassword', methods=["GET", "POST"])
 def forgotpassword():
     if request.method == "GET":
         email = request.form["email"]
         query = { "Email": email }
         user = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, query)
+        user = list(user)[0]
         email = user['Email']
 
         subject = 'Medics Reset Password Verfication'
-        body = 'use the following code ' + uuid.uuid4() + ' to verify your account.'
-        sendEmail(email, subject, body, HOST_EMAIL, HOST_EMAILPASSWORD)
+        body = 'use the following code ' + str(uuid.uuid4()) + ' to verify your account.'
+        title = 'Password reset'
+        sendEmail(email, subject, body, HOST_EMAIL, HOST_EMAILPASSWORD, title)
+        return 'Email sent successfully'
     elif request.method == "POST":
         storedVerificationCode = request.form["storedverificationcode"]
         inputVerificationCode = request.form["inputverificationcode"]
@@ -106,6 +108,8 @@ def forgotpassword():
                 message = 'Password updated successfully!!'
             else:
                 message = 'Error has been occurred, Please try again!!'
+            return message
+        return 'An error occured'
     
 
 
