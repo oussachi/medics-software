@@ -1,6 +1,7 @@
 import pymongo
 import gridfs
 import base64
+from bson.objectid import ObjectId
 
 # ------------------------------------------------------------------------------------------
 # Check database and collections:
@@ -109,22 +110,26 @@ def insertSubdocuments(connectionString, databaseName, collectionName, query, do
     # Declare variables
     record = False
     updateQyery = {}
-    updateData = { "$set": documents }
+    updateData = { "$push": documents }
+    _id = None
     
     # Preprocess updateQyery{} parameter
     i = 0
     # Loop through key value pairs
     for key, val in query.items():
-        # Check is item value start with "regex:" to determine wether it is a search pattern or plain item value
-        prefix = val[0:6].lower()
-        if (prefix == "regex:"):
-            # If item value starts with "regex:" add it as a key to the dictionary as below to tell python interpreter to search with regex pattern
-            updateQyery.update({key: { "$regex": val[6:] }})
-        else:
-            # It not as value as it is
-            updateQyery.update({key:val})
-        i = i+1
-    
+        if (key != 'id' and key != '_id' and key != 'Id'): # Check if the query is anything other than object id
+            # Check is item value start with "regex:" to determine wether it is a search pattern or plain item value
+            prefix = val[0:6].lower()
+            if (prefix == "regex:"):
+                # If item value starts with "regex:" add it as a key to the dictionary as below to tell python interpreter to search with regex pattern
+                updateQyery.update({key: { "$regex": val[6:] }})
+            else:
+                # It not as value as it is
+                updateQyery.update({key:val})
+        else: # Check if the query is object id
+            _id = val
+        i = i+1 
+        
     # Initialize connection
     dbClient = pymongo.MongoClient(connectionString)
     
@@ -135,8 +140,11 @@ def insertSubdocuments(connectionString, databaseName, collectionName, query, do
     col = db[collectionName]
     
     # Insert subdocuments
-    record = col.update_one(updateQyery, updateData)
-    
+    if (_id != None): # Check if the query is object id
+        record = col.update_one({'_id': ObjectId(_id)}, updateData)
+    else:
+        record = col.update_one(updateQyery, updateData)
+        
     # Return value based on update operation success
     if (record != False):
         status = True

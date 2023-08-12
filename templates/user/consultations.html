@@ -4,7 +4,9 @@
 </head>
 
 <body>
-    <form action="#" method="post">
-    </form>
+    User : {{ username }}
+    {% for consultation in consultations %}
+    <div> Message : {{ consultation.Messages[0][0].Content }} </div>
+    {% endfor %}
 </body>
 </html>

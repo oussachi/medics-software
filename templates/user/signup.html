@@ -4,16 +4,14 @@
 </head>
 
 <body>
-    <form action="#" method="post">
-        <input type="image" name="image" />
-        <input type="file" name="imagefile" />
+    <form action="/signup" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" />
         <input type="text" name="username" placeholder="User Name" />
         <input type="password" name="password" placeholder="Password" />
         <input type="text" name="email" placeholder="Email Address" />
         <input type="text" name="fullname" placeholder="Full Name" />
-        <textarea name="bio" placeholder="Bio" />
+        <input type="text" name="bio" placeholder="Bio" ></textarea>
         <input type="submit" name="submit" />
-        <label name="msg">{{ message }}</label>
     </form>
 </body>
 </html>
