@@ -4,7 +4,11 @@
 </head>
 
 <body>
-    <form action="#" method="post">
+    <form action="/consultation" method="POST">
+        <input type="text" name="consultationid" placeholder="Consultation ID">
+        <input type="submit" name="submit">
+
+        {{ consultation }}
     </form>
 </body>
 </html>

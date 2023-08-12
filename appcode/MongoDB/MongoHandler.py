@@ -386,21 +386,26 @@ def selectDocuments(connectionString, databaseName, collectionName,
                     recordsLimit = None):
     # Declare variables
     selectQyery = {}
+    _id = None
     
     # Preprocess selectQyery{} parameter
     if (query != None):
         i = 0
         # Loop through key value pairs
         for key, val in query.items():
-            # Check is item value start with "regex:" to determine wether it is a search pattern or plain item value
-            prefix = val[0:6].lower()
-            if (prefix == "regex:"):
-                # If item value starts with "regex:" add it as a key to the dictionary as below to tell python interpreter to search with regex pattern
-                selectQyery.update({key: { "$regex": val[6:] }})
-            else:
-                # It not as value as it is
+            if (key != 'id' and key != '_id' and key != 'Id'): # Check if the query is anything other than object id
+                # Check is item value start with "regex:" to determine wether it is a search pattern or plain item value
+                prefix = val[0:6].lower()
+                if (prefix == "regex:"):
+                    # If item value starts with "regex:" add it as a key to the dictionary as below to tell python interpreter to search with regex pattern
+                    selectQyery.update({key: { "$regex": val[6:] }})
+                else:
+                    # It not as value as it is
+                    selectQyery.update({key:val})
+            else: # Check if the query is object id
+                _id = val
                 selectQyery.update({key:val})
-            i = i+1
+        i = i+1 
         
     # Initialize connection
     dbClient = pymongo.MongoClient(connectionString)

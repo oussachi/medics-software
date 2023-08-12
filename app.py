@@ -186,34 +186,40 @@ def consult():
 
 
 
-# TO DO
+# DONE
 @app.route('/consultation', methods=["GET", "POST"])
 def consultation():
-    if request.method == "GET":
-        consultationId = request.form["consultationid"]
+    try:
+        if request.method == "POST":
+            consultationId = request.form["consultationid"]
 
-        if (consultationId != None or consultationId != ''):
-            query = { "Id": consultationId }
-            consultation = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, query)
-            return consultation
-
-
-
-
+            if (consultationId != None or consultationId != ''):
+                consultationId = ObjectId(consultationId)
+                query = { "_id": consultationId }
+                consultation = selectDocuments(CONNECTION_STRING, DATABASE_NAME, CONSULTATION_COLLECTION, query)
+                consultation = list(consultation)[0]
+                return render_template('user/consultation.html', consultation = consultation)
+        if request.method == 'GET':
+            return render_template('user/consultation.html')
+    except Exception as e:
+        return f'error : {e}'
 
 
 
 # DONE
 @app.route('/consultations', methods=["GET", "POST"])
 def consultations():
-    if request.method == "GET":
-        if session.get("name"):
-            userName = session.get("name")
-            
-            query = { "UserName": userName }
-            consultations = selectDocuments(CONNECTION_STRING, DATABASE_NAME, CONSULTATION_COLLECTION, query)
-            consultations = list(consultations)
-            return render_template('user/consultations.html', username=userName, consultations=consultations)
+    try:
+        if request.method == "GET":
+            if session.get("name"):
+                userName = session.get("name")
+                
+                query = { "UserName": userName }
+                consultations = selectDocuments(CONNECTION_STRING, DATABASE_NAME, CONSULTATION_COLLECTION, query)
+                consultations = list(consultations)
+                return render_template('user/consultations.html', username=userName, consultations=consultations)
+    except Exception as e:
+        return f'error : {e}'
 
 
 if __name__ == '__main__':
