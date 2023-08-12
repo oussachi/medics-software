@@ -86,23 +86,34 @@ def signin():
         return f'error : {e}'
 
 
-# TO DO
-@app.route('/forgotpassword', methods=["GET", "POST"])
-def forgotpassword():
-    if request.method == "GET":
+# DONE
+@app.route('/forgotpasswordcode', methods = ['GET', 'POST'])
+def forgotpasswordcode():
+    if request.method == 'POST':
         email = request.form["email"]
         query = { "Email": email }
         user = selectDocuments(CONNECTION_STRING, DATABASE_NAME, USER_COLLECTION, query)
         user = list(user)[0]
         email = user['Email']
 
+        code = str(uuid.uuid4())
         subject = 'Medics Reset Password Verfication'
-        body = 'use the following code ' + str(uuid.uuid4()) + ' to verify your account.'
+        body = 'use the following code ' + code + ' to verify your account.'
         title = 'Password reset'
         sendEmail(email, subject, body, HOST_EMAIL, HOST_EMAILPASSWORD, title)
-        return 'Email sent successfully'
+        session['verificationCode'] = code
+        return f'{body} Email sent successfully'
+    else :
+        return render_template('user/forgotpasswordCode.html')
+    
+    
+# DONE
+@app.route('/forgotpassword', methods=["GET", "POST"])
+def forgotpassword():
+    if request.method == "GET":
+        return render_template('user/forgotpassword.html')
     elif request.method == "POST":
-        storedVerificationCode = request.form["storedverificationcode"]
+        storedVerificationCode = session['verificationCode'] #request.form["storedverificationcode"]
         inputVerificationCode = request.form["inputverificationcode"]
         if (storedVerificationCode == inputVerificationCode):
             email = request.form["email"]
@@ -150,8 +161,6 @@ def profile():
         else:
             message = 'Error has been occurred, Please try again!!'
         return message
-
-
 
 
 
