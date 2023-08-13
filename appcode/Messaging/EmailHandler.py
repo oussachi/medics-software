@@ -1,9 +1,9 @@
 import emails
 
-def sendEmail(receiverEmail, emailSubject, emailBody, senderEmailAddress, senderEmailPassword, senderEmailTitle, hostServer='smtp.gmail.com', hostPort=587, tls=True, timeout=5):
+def sendEmail(receiverEmail, emailSubject, emailBody, senderEmailAddress, senderEmailPassword, senderEmailTitle, hostServer='smtp.gmail.com', hostPort=587, tls=True, timeout=10):
     message = emails.html(html = emailBody,                                         
                           subject = emailSubject,                                           
-                          mail_from = (senderEmailTitle,senderEmailAddress)) # Sender Details
+                          mail_from = (senderEmailTitle, senderEmailAddress)) # Sender Details
 
     mail = message.send(to=receiverEmail, 
                         smtp={'host': hostServer,            

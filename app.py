@@ -11,7 +11,7 @@ CONNECTION_STRING = 'mongodb+srv://medicssoftware:sFuj1OxAiWxQt3vu@cluster0.yjfe
 USER_COLLECTION = 'users'
 CONSULTATION_COLLECTION = 'consultations'
 HOST_EMAIL = 'medicssoftware@gmail.com'
-HOST_EMAILPASSWORD = 'flasktaskupwork'
+HOST_EMAILPASSWORD = ''
 UPLOAD_FOLDER = './static'
 
 app = Flask(__name__)
@@ -24,8 +24,6 @@ def home():
     return render_template('user/profile.html')
 
 
-
-# DONE
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
     try:
@@ -63,7 +61,6 @@ def signup():
         return f"error : {e}"
 
 
-# DONE
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
     try:
@@ -86,7 +83,6 @@ def signin():
         return f'error : {e}'
 
 
-# DONE
 @app.route('/forgotpasswordcode', methods = ['GET', 'POST'])
 def forgotpasswordcode():
     if request.method == 'POST':
@@ -100,14 +96,16 @@ def forgotpasswordcode():
         subject = 'Medics Reset Password Verfication'
         body = 'use the following code ' + code + ' to verify your account.'
         title = 'Password reset'
-        sendEmail(email, subject, body, HOST_EMAIL, HOST_EMAILPASSWORD, title)
+        result = sendEmail(email, subject, body, HOST_EMAIL, HOST_EMAILPASSWORD, title)
         session['verificationCode'] = code
-        return f'{body} Email sent successfully'
+        if (result):
+            return f'{body} Email sent successfully'
+        else:
+            return 'Email not sent'
     else :
         return render_template('user/forgotpasswordCode.html')
     
-    
-# DONE
+
 @app.route('/forgotpassword', methods=["GET", "POST"])
 def forgotpassword():
     if request.method == "GET":
@@ -130,7 +128,6 @@ def forgotpassword():
     
 
 
-# DONE
 @app.route('/profile', methods=["GET", "POST"])
 def profile():
     userName = session.get("name")
@@ -164,7 +161,6 @@ def profile():
 
 
 
-# DONE
 @app.route('/consult', methods=["GET", "POST"])
 def consult():
     try:
@@ -195,7 +191,6 @@ def consult():
 
 
 
-# DONE
 @app.route('/consultation', methods=["GET", "POST"])
 def consultation():
     try:
@@ -215,7 +210,6 @@ def consultation():
 
 
 
-# DONE
 @app.route('/consultations', methods=["GET", "POST"])
 def consultations():
     try:
